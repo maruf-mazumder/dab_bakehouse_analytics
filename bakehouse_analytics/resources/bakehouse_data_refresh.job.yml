@@ -20,28 +20,15 @@ resources:
           default: ${var.catalog}
         - name: schema
           default: ${var.schema}
-
       tasks:
-        - task_key: notebook_task
+        - task_key: customer_360
           notebook_task:
-            notebook_path: ../src/customer_360.ipynb
-        - task_key: python_wheel_task
+            notebook_path: bakehouse_analytics/src/customer_360.ipynb
+        - task_key: transactions_summary
           depends_on:
-            - task_key: notebook_task
-          python_wheel_task:
-            package_name: bakehouse_analytics
-            entry_point: main
-            parameters:
-              - "--catalog"
-              - "${var.catalog}"
-              - "--schema"
-              - "${var.schema}"
-          environment_key: default
-        - task_key: refresh_pipeline
-          depends_on:
-            - task_key: notebook_task
-          pipeline_task:
-            pipeline_id: ${resources.pipelines.bakehouse_analytics_etl.id}
+            - task_key: customer_360
+          notebook_task:
+            notebook_path: bakehouse_analytics/src/transactions_summary.ipynb
 
       environments:
         - environment_key: default
@@ -51,4 +38,8 @@ resources:
               # By default we just include the .whl file generated for the bakehouse_analytics package.
               # See https://docs.databricks.com/dev-tools/bundles/library-dependencies.html
               # for more information on how to add other libraries.
-              - ../dist/*.whl
+              - ./dist/*.whl
+      git_source:
+        git_branch: dev
+        git_provider: gitHub
+        git_url: https://github.com/maruf-mazumder/dab_bakehouse_analytics
